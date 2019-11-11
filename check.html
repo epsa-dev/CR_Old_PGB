@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Meta, title, CSS, favicons, etc. -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<!-- 
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, target-densitydpi=device-dpi" />
+-->
+
+<meta name="format-detection" content="telephone=no" />
+<meta name="msapplication-tap-highlight" content="no" /> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, target-densitydpi=medium-dpi, user-scalable=0" />
+<meta name="author" content="CircleRide">
+<title>CircleRide</title>
+
+<!-- CSS -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/font-awesome.min.css" rel="stylesheet"> 
+<!-- <link rel="stylesheet" href="css/bootstrap-theme.min.css">--->
+<link rel="stylesheet" href="css/estilos.css">
+
+<!-- Documentation extras -->
+<!--[if lt IE 9]><script src="js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+<!-- Favicons -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="favicon.ico">
+<link rel="shortcut icon" href="favicon.ico">
+
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/jquery.form.min.js"></script>
+<script src="js/purl.js"></script>
+
+<script src="PushNotification.js"></script>
+
+</head>
+<body>
+<script type="text/javascript">
+            var pushNotification;
+            function onDeviceReadyPush() {
+                $("#app-status-ul").append('<li>deviceready event received</li>');
+
+				document.addEventListener("backbutton", function(e)
+				{
+                	$("#app-status-ul").append('<li>backbutton event received</li>');
+
+      				if( $("#home").length > 0)
+					{
+							// call this to get a new token each time. don't call it to reuse existing token.
+							//pushNotification.unregister(successHandler, errorHandler);
+						e.preventDefault();
+						navigator.app.exitApp();
+					}
+					else
+					{
+						navigator.app.backHistory();
+					}
+				}, false);
+
+				try
+				{
+                	pushNotification = window.plugins.pushNotification;
+                	if (device.platform == 'android' || device.platform == 'Android') {
+						$("#app-status-ul").append('<li>registering android</li>');
+                    	pushNotification.register(successHandler, errorHandler, {"senderID":"569190724393","ecb":"onNotificationGCM"});		// required!
+					} else {
+						$("#app-status-ul").append('<li>registering iOS</li>');
+                    	pushNotification.register(tokenHandler, errorHandler, {"badge":"true","sound":"true","alert":"true","ecb":"onNotificationAPN"});	// required!
+                	}
+                }
+				catch(err)
+				{
+					txt="There was an error on this page.\n\n";
+					txt+="Error description: " + err.message + "\n\n";
+					//alert(txt);
+				}
+            }
+
+            // handle APNS notifications for iOS
+            function onNotificationAPN(e) {
+                if (e.alert) {
+                     $("#app-status-ul").append('<li>push-notification: ' + e.alert + '</li>');
+                     //navigator.notification.alert(e.alert);
+                }
+
+                if (e.sound) {
+                    var snd = new Media(e.sound);
+                    snd.play();
+                }
+
+                if (e.badge) {
+                    pushNotification.setApplicationIconBadgeNumber(successHandler, e.badge);
+                }
+            }
+
+            // handle GCM notifications for Android
+            function onNotificationGCM(e) {
+                $("#app-status-ul").append('<li>EVENT -> RECEIVED:' + e.event + '</li>');
+
+                switch( e.event )
+                {
+                    case 'registered':
+					if ( e.regid.length > 0 )
+					{
+						$("#app-status-ul").append('<li>REGISTERED -> REGID:<a href="mailto:circleride.team@gmail.com?body=' + e.regid + '">' + e.regid + '</a></li>');
+						window.localStorage.setItem("token_push", e.regid);
+						// Your GCM push server needs to know the regID before it can push to this device
+						// here is where you might want to send it the regID for later use.
+						console.log("regID = " + e.regid);
+					}
+                    break;
+
+                    case 'message':
+                    	// if this flag is set, this notification happened while we were in the foreground.
+                    	// you might want to play a sound to get the user's attention, throw up a dialog, etc.
+                    	if (e.foreground)
+                    	{
+							$("#app-status-ul").append('<li>--INLINE NOTIFICATION--' + '</li>');
+
+							// if the notification contains a soundname, play it.
+							var my_media = new Media(e.soundname);
+							my_media.play();
+						}
+						else
+						{	// otherwise we were launched because the user touched a notification in the notification tray.
+							if (e.coldstart)
+								$("#app-status-ul").append('<li>--COLDSTART NOTIFICATION--' + '</li>');
+							else
+							$("#app-status-ul").append('<li>--BACKGROUND NOTIFICATION--' + '</li>');
+						}
+
+						$("#app-status-ul").append('<li>MESSAGE -> MSG: ' + e.payload.message + '</li>');
+						$("#app-status-ul").append('<li>MESSAGE -> MSGCNT: ' + e.payload.msgcnt + '</li>');
+                    break;
+
+                    case 'error':
+						$("#app-status-ul").append('<li>ERROR -> MSG:' + e.msg + '</li>');
+                    break;
+
+                    default:
+						$("#app-status-ul").append('<li>EVENT -> Unknown, an event was received and we do not know what it is</li>');
+                    break;
+                }
+            }
+
+            function tokenHandler (result) {
+                $("#app-status-ul").append('<li>token: <a href="mailto:circleride.team@gmail.com?body=' + result + '">'+ result +'</a></li>');
+				window.localStorage.setItem("token_push", result);
+                // Your iOS push server needs to know the token before it can push to this device
+                // here is where you might want to send it the token for later use.
+            }
+
+            function successHandler (result) {
+                $("#app-status-ul").append('<li>success:'+ result +'</li>');
+            }
+
+            function errorHandler (error) {
+                $("#app-status-ul").append('<li>error:'+ error +'</li>');
+            }
+
+			document.addEventListener('deviceready', onDeviceReadyPush, true);
+</script>
+
+
+<div id="Index_Header"></div>
+
+<div class="container">
+
+<div id="Index_Form"></div>
+<div id="CheckValid_Login"></div>
+<div id="Check_Login"></div>
+
+</div>
+
+<script>
+$(document).ready(function() {
+//var token_push = $.url().param('token_push'); 
+
+var token_push = window.localStorage.getItem("token_push");
+if(token_push)
+{  }
+else { 
+token_push = "";
+} 
+
+var page = $.url().param('page'); 
+
+var url_server = window.localStorage.getItem("url_server");
+if(url_server)
+{  }
+else { url_server = "http://m.circleride.com"; } 
+
+var loading_text = window.localStorage.getItem("loading_text");
+if(loading_text)
+{  }
+else { loading_text = "Cargando..."; }
+
+var error_text = window.localStorage.getItem("error_text");
+if(error_text)
+{  }
+else { error_text = "Lo sentimos, pero no se pudo contactar al servidor correctamente, pulse aqu&iacute; para reportar este error: <br>"; } 
+
+var fck_key = window.localStorage.getItem("key"); 
+var page_header = url_server + "/inc/page.header.php?movil=1&key="+fck_key+"";
+var page_index = url_server + "/inc/page.index.php?movil=1&key="+fck_key+"&token_push="+token_push+"&page="+page+"";
+var page_footer = url_server + "/inc/page.footer.php?movil=1&key="+fck_key+"";
+
+$("#Index_Form").load(page_index, function(){
+$('#Form_Login').ajaxForm({
+target: '#CheckValid_Login',
+success: function() { $('#CheckValid_Login').fadeIn('slow'); }
+});
+});
+
+/*
+$( "#Index_Form" ).load(page_home, function( response, status, xhr ) {
+if ( status == "error" ) {
+	var msg = error_text;
+	$( "#Index_Form" ).html( "<div align='center'><br><br><a href='http://m.circleride.com/lib/report_load_error.php?movil=1&key="+fck_key+"&js_key="+js_key+"&status="+ xhr.status +"&statusText="+ xhr.statusText +"'>" + msg + xhr.status + " " + xhr.statusText + "</a><br><a href='mailto:soporte@circleride.com?subject=ReporteErrorApp&body=%0A%0A---%0AReporte%20de%20error%20App%20CircleRide%0A%0AData:%0A%0Amovil=1&key="+fck_key+"&js_key="+js_key+"&status="+ xhr.status +"&statusText="+ xhr.statusText +"'>Enviar reporte por email</a></div>");
+}
+$('#Form_Login').ajaxForm({
+target: '#CheckValid_Login',
+success: function() { $('#CheckValid_Login').fadeIn('slow'); }
+});
+});
+*/
+
+$("#Index_Header").load(page_header, function(){  });
+$("#Index_Footer").load(page_footer, function(){  });
+
+//$('#Check_Login').html(fck_key);
+var url_checklogin = url_server + "/check.ajax.php?check=1&movil=1&page="+page+"&token_push="+token_push+"";
+function checkLogin(fck_key){
+    var request = $.ajax({
+        url: url_checklogin,
+        type: "POST",
+        data: { key : fck_key },
+        dataType: "json",
+        beforeSend : function(){
+			$('#Check_Login').html('<div class="container-fluid" align="center"><br>' + loading_text + '<br></div>');
+        }
+    });
+    // RESPONSE
+    request.done(function(data) {
+		$('#Check_Login').empty();
+        if(data["status"] == "ok"){
+			//$('#Check_Login').html("Ok, Valido");
+			$('#Show_Form_Login').hide();
+			$('#Check_Login').html(""+data["msg"]+"");
+        }else{
+            // If the status is not ok, you show an alert and no change the login page
+            //alert(data["msg"],false,'Error','Ok');
+			$('#Check_Login').html(""+data["msg"]+"");
+        }
+    });
+}
+
+$('#Form_Login').ajaxForm({
+        target: '#CheckValid_Login',
+        success: function() {
+            $('#CheckValid_Login').fadeIn('slow');
+        }
+});
+
+window.onload = checkLogin(fck_key);
+
+document.addEventListener('deviceready', onLoL, false);
+function onLoL()
+{
+jQuery.cachedScript = function( url, options ) {
+options = $.extend( options || {}, {
+    dataType: "script",
+    cache: true,
+    url: url
+  });
+  return jQuery.ajax( options );
+}; 
+var script_header = url_server + "/header.js.php?movil=1&key="+fck_key+"&token_push="+token_push+"";
+$.cachedScript(script_header).done(function( script, textStatus ) {
+//$('.event').html("Completado!");
+//$('.script_progress').css("width", "100%");
+//window.setTimeout(function() { window.location.href = "check.html"},3000); 
+})
+.fail(function( jqxhr, settings, exception ) {
+//$("div.log").text( "Triggered ajaxError handler." ); 
+//$('.event').html("Error!");
+}); 
+}
+
+});
+</script>
+
+<div id="Index_Footer"></div>
+
+<script type="text/javascript" src="phonegap.js"></script>
+<script src="js/bootstrap.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,3 @@
+"permissions": {
+    "geolocation": { "description": "Uso de GPS en CircleRide" }
+}

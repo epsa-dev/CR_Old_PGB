@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<!-- Meta, title, CSS, favicons, etc. -->
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<!-- 
+<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, target-densitydpi=device-dpi" />
+-->
+
+<meta name="format-detection" content="telephone=no" />
+<meta name="msapplication-tap-highlight" content="no" /> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, target-densitydpi=medium-dpi, user-scalable=0" />
+
+<meta name="author" content="CircleRide">
+<title>CircleRide</title>
+
+<!-- CSS -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/font-awesome.min.css" rel="stylesheet">
+
+<!-- <link rel="stylesheet" href="css/bootstrap-theme.min.css">--->
+<link rel="stylesheet" href="css/estilos.css">
+
+
+<!-- Documentation extras -->
+<!--[if lt IE 9]><script src="js/ie8-responsive-file-warning.js"></script><![endif]-->
+
+<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+  <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+
+<!-- Favicons -->
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="favicon.ico">
+<link rel="shortcut icon" href="favicon.ico">
+
+<script src="js/jquery-1.11.1.min.js"></script>
+<script src="js/jquery.form.min.js"></script>
+<script src="js/purl.js"></script>
+
+</head>
+<body>
+
+<div id="Index_Header"></div>
+
+<div class="container">
+
+<div id="Page_Contacto"></div>
+
+<div id="CheckValid_Home"></div>
+<div id="Check_Login"></div>
+
+</div>
+
+<script>
+$(document).ready(function() {
+
+var page = $.url().param('page'); 
+
+var url_server = window.localStorage.getItem("url_server");
+if(url_server)
+{  }
+else { url_server = "http://m.circleride.com"; } 
+
+var loading_text = window.localStorage.getItem("loading_text");
+if(loading_text)
+{  }
+else { loading_text = "Cargando..."; } 
+
+var fck_key = window.localStorage.getItem("key");
+var js_key = window.localStorage.getItem("js_key");
+
+var page_header = url_server + "/inc/page.header.php?movil=1&page="+page+"&key="+fck_key+"";
+var page_home = url_server + "/inc/page.contacto.php?movil=1&page="+page+"&key="+fck_key+"";
+var page_footer = url_server + "/inc/page.footer.php?movil=1&page="+page+"&key="+fck_key+"";
+
+$("#Page_Contacto").load(page_home, function(){
+$('#Form_Contacto').ajaxForm({
+target: '#CheckValid_Contacto',
+success: function() { $('#CheckValid_Contacto').fadeIn('slow'); }
+});
+});
+
+$("#Index_Header").load(page_header, function(){  });
+$("#Index_Footer").load(page_footer, function(){  });
+
+$('#Check_Login').html(fck_key);
+function checkLogin(fck_key){
+
+var url_checklogin = url_server + "/check.ajax.php?check=1&movil=1&page="+page+"";
+var request = $.ajax({
+    url: url_checklogin,
+    type: "POST",
+    data: { key : fck_key, page : page  },
+    dataType: "json",
+    beforeSend : function()
+	{
+		$('#Check_Login').html('<div class="container-fluid" align="center"><br>' + loading_text + '<br></div>');
+	}
+});
+
+// RESPONSE
+
+request.done(function(data) 
+{
+	$('#Check_Login').empty();
+	if(data["status"] == "ok"){
+	//$('#Check_Login').html("Ok, Valido");
+	$('#Show_Form_Login').hide();
+	$('#Check_Login').html(""+data["msg"]+"");
+	}else{
+	// If the status is not ok, you show an alert and no change the login page
+	//alert(data["msg"],false,'Error','Ok');
+	$('#Check_Login').html(""+data["msg"]+"");
+	}
+});
+}
+
+$('#Form_Login').ajaxForm({
+	target: '#CheckValid_Login',
+	success: function() {
+	$('#CheckValid_Login').fadeIn('slow');
+	}
+});
+
+window.onload = checkLogin(fck_key);
+
+jQuery.cachedScript = function( url, options ) {
+options = $.extend( options || {}, {
+    dataType: "script",
+    cache: true,
+    url: url
+  });
+  return jQuery.ajax( options );
+}; 
+
+var script_header = url_server + "/header.js.php?movil=1&key="+fck_key+"&page="+page+"";
+$.cachedScript(script_header).done(function( script, textStatus ) {
+//$('.event').html("Completado!");
+//$('.script_progress').css("width", "100%");
+//window.setTimeout(function() { window.location.href = "check.html"},3000); 
+})
+.fail(function( jqxhr, settings, exception ) {
+//$("div.log").text( "Triggered ajaxError handler." ); 
+//$('.event').html("Error!");
+}); 
+
+});
+</script>
+
+<div id="Index_Footer"></div>
+
+<script src="js/bootstrap.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "38913838556",
+    "firebase_url": "https://circleride-6cc1e.firebaseio.com",
+    "project_id": "circleride",
+    "storage_bucket": "circleride.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:38913838556:android:5d11ec3c75963456c55319",
+        "android_client_info": {
+          "package_name": "com.circleride.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "38913838556-1b2us93hvh1eoh544kddnuo7vakia711.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLZf5V5ZPDFMqO0vR4zbRFdNmgHhcaAok"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "38913838556-1b2us93hvh1eoh544kddnuo7vakia711.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
