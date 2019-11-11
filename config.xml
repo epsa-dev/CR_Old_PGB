@@ -4,11 +4,10 @@
 <widget xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0" id="com.circleride.app" version="0.2.1">
 <name>CircleRide</name>
 <description>CircleRide es una red de usuarios, que están de acuerdo en participar con sus amigos en distintos eventos, como trayectos a la escuela, fines de semana, vacaciones, rolas escolares, viajes de trabajo, conciertos, eventos deportivos, entre muchos otros, a través de contactarse mediante este sistema, en donde se ofrecen y/o solicitan viajes privados o públicos, que coinciden con sus necesidades de búsqueda. Organizan y economizan tantas actividades como quieran, todo en compañía. Es divertido y seguro, aún más, ayudan a conservar el medio ambiente.</description>
-<author href="http://www.circleride.com" email="soporte@circleride.com">
-CircleRide.Com</author>
+<author href="http://www.circleride.com" email="soporte@circleride.com">CircleRide.Com</author>
 
 <preference name="android-minSdkVersion" value="18"/>
-<preference name="android-targetSdkVersion" value="26" />
+<preference name="android-targetSdkVersion" value="28" />
 
 <preference name="phonegap-version" value="cli-7.1.0" />
 <preference name="android-build-tool" value="gradle" />
